@@ -18,7 +18,7 @@ codemap itself:
 ```
 config/config.go · 40 importers · hub (3+)
 src/email/emailService.ts · 12 importers
-blast: config/config.go · 40 importers · PR #372 also changes src/email/emailService.ts
+blast: config/config.go · 40 importers · PR #371 also changes src/email/emailService.ts
 [ Attach importers ]  [ codemap ▾ ]
 ```
 

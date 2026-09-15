@@ -2,7 +2,7 @@
   "version": 2,
   "generated_at": "2026-09-15T08:59:06.74608-04:00",
   "project": {
-    "root": "/Users/jordan/Code/codemap",
+    "root": "/repo",
     "branch": "main",
     "file_count": 291,
     "languages": [
@@ -22,7 +22,7 @@
     }
   },
   "handoff": {
-    "path": "/Users/jordan/Code/codemap/.codemap/projects/6e330964f718/handoff.latest.json",
+    "path": "/repo/.codemap/projects/0000/handoff.latest.json",
     "generated_at": "2026-09-11T19:21:48.749574-04:00",
     "changed_files": 7,
     "risk_files": 0

@@ -19,27 +19,77 @@ const BODY: ReviewGateRequest = {
 };
 
 describe('requestReview', () => {
-  test('a 200 with review:true decides yes and carries the reason', async () => {
+  // Response bodies below match codemap-brief-webhook's real policy v1 output.
+  const POLICY = { name: 'default', version: 1, source: 'default', thresholds: { hub_importers: 9, hubs: 2, large_diff_lines: 400 } };
+
+  test('a 200 with review:true decides yes and carries the fired rule facts', async () => {
     const $ = mockEngine(async () => ({
       status: 200,
       ok: true,
       headers: {},
-      text: JSON.stringify({ review: true, reason: 'config/config.go has 40 importers' }),
+      text: JSON.stringify({
+        review: true,
+        reasons: [{ rule: 'hub_importers', fact: 'config/config.go has 40 importers' }],
+        skip_reasons: [],
+        policy: POLICY,
+        calibration: { outcomes_recorded: 0, note: 'fewer than 30 outcomes' },
+        limits: [],
+      }),
     }));
     const outcome = await requestReview($, 'key', BODY);
-    expect(outcome).toEqual({ kind: 'decided', review: true, reason: 'config/config.go has 40 importers' });
+    expect(outcome).toEqual({
+      kind: 'decided',
+      review: true,
+      reason: 'config/config.go has 40 importers',
+      facts: ['config/config.go has 40 importers'],
+      limits: [],
+      policy: 'default v1',
+    });
     expect(summaryLine(outcome)).toBe('Review: yes · config/config.go has 40 importers');
   });
 
-  test('a 200 with review:false decides skip', async () => {
+  test('several fired rules show the first fact and count the rest', async () => {
     const $ = mockEngine(async () => ({
       status: 200,
       ok: true,
       headers: {},
-      text: JSON.stringify({ review: false, reason: '3 files, highest importers 1' }),
+      text: JSON.stringify({
+        review: true,
+        reasons: [
+          { rule: 'hub_importers', fact: 'config/config.go has 40 importers' },
+          { rule: 'large_diff', fact: '512 lines changed (threshold 400)' },
+        ],
+        skip_reasons: [],
+        policy: POLICY,
+        limits: ['2 of 31 changed files measured (cap 30)'],
+      }),
     }));
     const outcome = await requestReview($, 'key', BODY);
-    expect(summaryLine(outcome)).toBe('Review: skip · 3 files, highest importers 1');
+    expect(summaryLine(outcome)).toBe('Review: yes · config/config.go has 40 importers · +1 more');
+    expect(outcome.kind === 'decided' && outcome.limits).toEqual(['2 of 31 changed files measured (cap 30)']);
+  });
+
+  test('a 200 with review:false decides skip from skip_reasons', async () => {
+    const $ = mockEngine(async () => ({
+      status: 200,
+      ok: true,
+      headers: {},
+      text: JSON.stringify({
+        review: false,
+        reasons: [],
+        skip_reasons: [{ fact: '3 changed files, highest importers 1 (src/util/fmt.ts)' }],
+        policy: POLICY,
+        limits: [],
+      }),
+    }));
+    const outcome = await requestReview($, 'key', BODY);
+    expect(summaryLine(outcome)).toBe('Review: skip · 3 changed files, highest importers 1 (src/util/fmt.ts)');
+  });
+
+  test('a decision with no facts says so instead of inventing one', async () => {
+    const $ = mockEngine(async () => ({ status: 200, ok: true, headers: {}, text: JSON.stringify({ review: true, policy: POLICY }) }));
+    const outcome = await requestReview($, 'key', BODY);
+    expect(summaryLine(outcome)).toBe('Review: yes · the default v1 returned no facts');
   });
 
   test('401 is unauthorized, not a generic error', async () => {
