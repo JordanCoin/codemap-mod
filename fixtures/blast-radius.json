@@ -1,0 +1,55 @@
+{
+  "root": "/Users/jordan/Code/codemap",
+  "ref": "HEAD~5",
+  "summary": {
+    "changed_files": 20,
+    "changed_files_total": 77,
+    "files_with_dependents": 2,
+    "impacted_outside_diff_total": 19,
+    "impacted_outside_diff_shown": 12,
+    "dependency_context_outside_diff_total": 2,
+    "dependency_context_outside_diff_shown": 1,
+    "max_direct_dependents": 40,
+    "highest_blast_radius": {
+      "file": "config/config.go",
+      "importer_count": 40
+    }
+  },
+  "impacted_outside_diff": [
+    {
+      "path": "blast_radius_fixes_test.go",
+      "via": "config/config.go",
+      "relation": "imports_changed_file",
+      "via_is_hub": true,
+      "via_importer_count": 40
+    },
+    {
+      "path": "cmd/config_test.go",
+      "via": "config/config.go",
+      "relation": "imports_changed_file",
+      "via_is_hub": true,
+      "via_importer_count": 40
+    },
+    {
+      "path": "cmd/context.go",
+      "via": "config/config.go",
+      "relation": "imports_changed_file",
+      "via_is_hub": true,
+      "via_importer_count": 40
+    },
+    {
+      "path": "cmd/context_evidence_test.go",
+      "via": "config/config.go",
+      "relation": "imports_changed_file",
+      "via_is_hub": true,
+      "via_importer_count": 40
+    },
+    {
+      "path": "cmd/doctor.go",
+      "via": "config/config.go",
+      "relation": "imports_changed_file",
+      "via_is_hub": true,
+      "via_importer_count": 40
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+export const PANE_ID = 'codemap';
+export const COMMAND_NAME = 'codemap';
+export const BAND_ROWS_MAX = 3;
+export const REVIEW_GATE_URL = 'https://codemap-brief-webhook.vercel.app/api/review-gate';
+export const OFFER_URL = 'https://codemap-site.vercel.app/offer';
+export const DEFAULT_HUB_IMPORTER_THRESHOLD = 9;
+export const EDIT_TOOL_NAMES = ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'] as const;
+export const EDIT_TOOLS = new Set<string>(EDIT_TOOL_NAMES);
+export const SKYLINE_COLORS = ['#c96a5a', '#8fc7c2', '#d8b26a', '#b48ac9', '#8fbf7f'] as const;

@@ -1,0 +1,35 @@
+{
+  "schema": "codemap.collide/v1",
+  "min_importers": 0,
+  "trust": "high",
+  "coverage": { "status": "complete", "languages": [], "untracked_files": 0 },
+  "prs": [
+    { "number": 371, "title": "Rework email retry", "headRefName": "email-retry" },
+    { "number": 372, "title": "Add SendGrid webhook", "headRefName": "sendgrid-webhook" }
+  ],
+  "shared_files": [
+    {
+      "path": "src/email/emailService.ts",
+      "prs": [371, 372],
+      "language": "typescript",
+      "importer_count": 12,
+      "importer_scope": "repo",
+      "importers_known": true,
+      "in_graph": true
+    }
+  ],
+  "pairs": [
+    {
+      "a": 371,
+      "b": 372,
+      "shared_file_count": 1,
+      "shared_files": ["src/email/emailService.ts"],
+      "top_file": "src/email/emailService.ts",
+      "top_importer_count": 12,
+      "top_importer_scope": "repo",
+      "top_importers_known": true,
+      "top_file_in_graph": true
+    }
+  ],
+  "hidden_by_min_importers": 0
+}

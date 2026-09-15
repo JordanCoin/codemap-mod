@@ -1,0 +1,31 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "codemap",
+  "version": "1.0.0",
+  "description": "codemap inside Claude Code: hub warnings at the edit, the session's blast radius above the prompt, zero tokens",
+  "author": { "name": "Jordan Coin Jackson" },
+  "homepage": "https://github.com/JordanCoin/codemap-mod",
+  "repository": "https://github.com/JordanCoin/codemap-mod",
+  "license": "MIT",
+  "keywords": ["codemap", "hooks", "blast-radius", "code-intelligence"],
+  "userConfig": {
+    "hubEdits": {
+      "title": "Hub edits",
+      "type": "string",
+      "default": "annotate",
+      "description": "What an edit to a hub file (3+ importers) does at or above hubImporterThreshold: annotate (default, never blocks), ask, or deny."
+    },
+    "hubImporterThreshold": {
+      "title": "Hub importer threshold",
+      "type": "number",
+      "default": 9,
+      "description": "Importer count at or above which hubEdits' ask/deny takes effect."
+    },
+    "licenseKey": {
+      "title": "codemap Team license key",
+      "type": "string",
+      "default": "",
+      "description": "Also settable via the CODEMAP_LICENSE_KEY environment variable."
+    }
+  }
+}

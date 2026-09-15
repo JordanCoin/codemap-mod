@@ -1,0 +1,17 @@
+{
+  "name": "codemap-mod",
+  "owner": { "name": "Jordan Coin Jackson" },
+  "metadata": {
+    "description": "codemap inside Claude Code: hub warnings at the edit, the session's blast radius above the prompt, zero tokens"
+  },
+  "plugins": [
+    {
+      "name": "codemap",
+      "source": "./",
+      "description": "codemap inside Claude Code: hub warnings at the edit, the session's blast radius above the prompt, zero tokens",
+      "homepage": "https://github.com/JordanCoin/codemap-mod",
+      "repository": "https://github.com/JordanCoin/codemap-mod",
+      "license": "MIT"
+    }
+  ]
+}

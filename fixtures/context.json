@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "generated_at": "2026-09-15T08:59:06.74608-04:00",
+  "project": {
+    "root": "/Users/jordan/Code/codemap",
+    "branch": "main",
+    "file_count": 291,
+    "languages": [
+      "bash",
+      "go",
+      "ruby"
+    ],
+    "hub_count": 3,
+    "top_hubs": [
+      "config/config.go",
+      "analysis/contracts.go",
+      "internal/buildinfo/version.go"
+    ],
+    "graph_evidence": {
+      "status": "available",
+      "source": "fresh_scan"
+    }
+  },
+  "handoff": {
+    "path": "/Users/jordan/Code/codemap/.codemap/projects/6e330964f718/handoff.latest.json",
+    "generated_at": "2026-09-11T19:21:48.749574-04:00",
+    "changed_files": 7,
+    "risk_files": 0
+  },
+  "budget": {
+    "total_bytes": 565,
+    "compact": false
+  }
+}

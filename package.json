@@ -1,0 +1,17 @@
+{
+  "name": "codemap-mod",
+  "version": "1.0.0",
+  "description": "codemap inside Claude Code: hub warnings at the edit, the session's blast radius above the prompt, zero tokens",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "bunx -p typescript tsc -p .",
+    "validate": "claude plugin validate .claude-plugin/plugin.json && claude plugin validate ."
+  },
+  "devDependencies": {
+    "bun-types": "^1.4.2",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,133 @@
+# codemap-mod
+
+[codemap](https://github.com/JordanCoin/codemap) inside Claude Code: hub warnings at the edit, the
+session's blast radius above the prompt, zero tokens spent reading it.
+
+This is a Claude Code **mod** - a plugin built on the early-access function-hooks API, not a classic
+shell hook. It reads codemap's own `--json` output and renders it directly in the terminal UI; codemap
+stays the source of truth, this mod never invents a fact codemap did not print.
+
+## What it shows, and when
+
+**At the edit.** Before Edit, Write, MultiEdit, or NotebookEdit lands on a hub file (3+ importers), the
+band below shows it. The default mode never blocks - an agent that cannot edit a hub cannot fix it.
+
+**While it works.** A band above the prompt, at most 3 rows, reading only from cache - it never runs
+codemap itself:
+
+```
+config/config.go · 40 importers · hub (3+)
+src/email/emailService.ts · 12 importers
+blast: config/config.go · 40 importers · PR #372 also changes src/email/emailService.ts
+[ Attach importers ]  [ codemap ▾ ]
+```
+
+Press `[ codemap ▾ ]` to collapse it to one line (remembered across sessions):
+
+```
+codemap ▸
+```
+
+**When the turn ends.** In the background: blast radius against the session's starting commit, and
+(when `gh` is available) PR collisions. The band's next draw shows the result.
+
+**`/codemap`** opens a pane with five sections:
+
+```
+╭─ codemap ─────────────────────────────────────────────────╮
+│ This session                                               │
+│ config/config.go · 40 importers · hub (3+)                 │
+│ src/email/emailService.ts · 12 importers                   │
+│ Impacted outside the diff:                                 │
+│   cmd/config.go · via config/config.go (40 importers)      │
+│                                                              │
+│ Hubs                                                        │
+│ config/config.go                                            │
+│ analysis/contracts.go                                       │
+│                                                              │
+│ Collisions                                                  │
+│ src/email/emailService.ts · PRs 371, 372 · 12 importers     │
+│                                                              │
+│ codemap Team                                                │
+│ Review: yes · config/config.go has 40 importers             │
+│                                                              │
+│ Skyline                                                     │
+│ ████████████████████████ go · 228 files                    │
+│ ███ bash · 3 files                                          │
+│ █ ruby · 1 file                                             │
+╰───────────────────────────────────────────────────────────╯
+```
+
+Without a `licenseKey`, "codemap Team" is one line and a link to the offer page instead.
+
+**Less context, not more.** One line at conversation start:
+
+```
+codemap: 291 files, 3 hubs, coverage complete. /codemap for detail.
+```
+
+If this project still has codemap's classic shell hooks installed, the pane shows a one-time notice -
+this mod does the same job from inside Claude Code, so they're redundant. It does not touch or rewrite
+their output.
+
+## Requirements
+
+- [codemap](https://github.com/JordanCoin/codemap) 4.5.1 or newer, on `PATH` (`brew install codemap`)
+- Claude Code 2.1.268 or newer
+- `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` in your environment (the mod API is early access)
+- A git repository. Outside one, the band stays hidden and the pane says so.
+
+## Install
+
+```
+claude plugin marketplace add JordanCoin/codemap-mod
+claude plugin install codemap@codemap-mod
+```
+
+## Settings
+
+| Setting | Default | What it does |
+|---|---|---|
+| `hubEdits` | `annotate` | `annotate` never blocks. `ask` puts an edit to a hub at or above the threshold to the person. `deny` refuses it outright. |
+| `hubImporterThreshold` | `9` | Importer count at or above which `ask`/`deny` takes effect. Below it, every mode behaves like `annotate`. |
+| `licenseKey` | unset | codemap Team license key. Also settable via the `CODEMAP_LICENSE_KEY` environment variable. |
+
+The band's collapsed/expanded state is a button, not a manifest setting - it is remembered per
+workspace automatically.
+
+## Privacy
+
+This mod is MIT and free. Every fact in the band and most of the pane comes from codemap's own local
+`--json` output and never leaves your machine.
+
+The one exception: with a `licenseKey` set, once per completed turn this mod POSTs to codemap's paid
+review-gate endpoint - **paths, importer counts, added/removed line counts, and language, never file
+contents** - and shows back the decision (`Review: yes · config/config.go has 40 importers`). Without a
+key, nothing is sent anywhere and the pane says so.
+
+## Known limits
+
+- The mod (function-hooks) API is early access and evolving; this build was written against
+  `.claude/types/cc-mods.d.ts` as generated by Claude Code 2.1.271, and has not yet been exercised in a
+  live Claude Code session by the author - only unit-tested against mocked `$`.
+- That same build's `BuiltinToolInputs` does not declare a `MultiEdit` tool, so this mod cannot use a
+  typed matcher for it; it checks the tool name at runtime instead, which still works whether or not a
+  given install's declarations know about MultiEdit.
+- The Skyline's per-language bar widths come from `codemap --deps --json` (session start only, cached),
+  not `codemap context`, because `context` names which languages a project has but not how many files
+  each has.
+- The review-gate response schema (`{ review, reason }`) was inferred from the spec and a probe of the
+  live endpoint's error responses, not from published documentation - a real success response may not
+  match exactly.
+
+## Development
+
+```
+bun install
+bun test          # unit tests
+bun run typecheck  # tsc against .claude/types/cc-mods.d.ts (not checked in - see below)
+```
+
+`.claude/types/cc-mods.d.ts` is git-ignored (it is machine- and version-specific, written by
+`/plugin-types`). Regenerate it with `/plugin-types` in a Claude Code session before running
+`bun run typecheck` on a fresh checkout.

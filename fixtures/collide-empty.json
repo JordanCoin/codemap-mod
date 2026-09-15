@@ -1,0 +1,14 @@
+{
+  "schema": "codemap.collide/v1",
+  "min_importers": 0,
+  "trust": "high",
+  "coverage": {
+    "status": "complete",
+    "languages": [],
+    "untracked_files": 0
+  },
+  "prs": [],
+  "shared_files": [],
+  "pairs": [],
+  "hidden_by_min_importers": 0
+}
