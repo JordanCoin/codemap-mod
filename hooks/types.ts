@@ -1,5 +1,5 @@
 // Shapes of the codemap CLI's --json output, learned from real runs against
-// /Users/jordan/Code/codemap (codemap dev, 2026-09-15). codemap has no
+// a local codemap checkout (codemap dev, 2026-09-15). codemap has no
 // stability guarantee on these fields yet; a field this mod does not read is
 // left out below on purpose.
 

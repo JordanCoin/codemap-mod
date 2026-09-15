@@ -16,7 +16,8 @@ export interface ChangedFile {
 
 export interface ReviewGateRequest {
   repo: string;
-  pr: null;
+  /** The branch's open PR when `gh` finds one; null for a branch with no PR yet. */
+  pr: number | null;
   base_sha: string;
   head_sha: string;
   codemap_version: string;
@@ -27,7 +28,9 @@ export interface ReviewGateRequest {
 }
 
 export type ReviewGateOutcome =
-  | { kind: 'decided'; review: boolean; reason: string }
+  /** `reason` is the first fact, for one-line surfaces; `facts` holds all of
+   *  them (the fired rules on review, the skip facts otherwise). */
+  | { kind: 'decided'; review: boolean; reason: string; facts: string[]; limits: string[]; policy: string }
   | { kind: 'unauthorized' }
   | { kind: 'payment_required' }
   | { kind: 'error'; message: string };
@@ -93,10 +96,24 @@ export async function requestReview(
   if (!response.ok) return { kind: 'error', message: `HTTP ${response.status}` };
 
   try {
-    const data = JSON.parse(response.text) as { review?: unknown; reason?: unknown };
+    // The API answers {review, reasons:[{rule, fact}], skip_reasons:[{fact}],
+    // policy:{name, version}, limits:[string]} (codemap-brief-webhook lib/gate.js).
+    const data = JSON.parse(response.text) as {
+      review?: unknown;
+      reasons?: Array<{ fact?: unknown }>;
+      skip_reasons?: Array<{ fact?: unknown }>;
+      policy?: { name?: unknown; version?: unknown };
+      limits?: unknown[];
+    };
     const review = data.review === true;
-    const reason = typeof data.reason === 'string' ? data.reason : review ? 'review recommended' : 'no reviewable change';
-    return { kind: 'decided', review, reason };
+    const source = review ? data.reasons : data.skip_reasons;
+    const facts = (Array.isArray(source) ? source : [])
+      .map((r) => (typeof r?.fact === 'string' ? r.fact : ''))
+      .filter(Boolean);
+    const limits = (Array.isArray(data.limits) ? data.limits : []).filter((l): l is string => typeof l === 'string');
+    const policy = typeof data.policy?.name === 'string' ? `${data.policy.name} v${String(data.policy.version ?? '?')}` : 'unknown policy';
+    const reason = facts[0] ?? `the ${policy} returned no facts`;
+    return { kind: 'decided', review, reason, facts, limits, policy };
   } catch {
     return { kind: 'error', message: 'invalid JSON response' };
   }
@@ -115,6 +132,10 @@ export async function buildRequest(
 ): Promise<ReviewGateRequest> {
   const touched = [...state.touched.values()];
   const version = (await runText($, ['codemap', '--version'], cwd)) ?? 'unknown';
+  // The branch's open PR, when there is one. gh missing or no PR both give null.
+  const prText = await runText($, ['gh', 'pr', 'view', '--json', 'number', '--jq', '.number'], cwd);
+  const prNumber = Number.parseInt(prText?.trim() ?? '', 10);
+  const pr = Number.isInteger(prNumber) && prNumber > 0 ? prNumber : null;
   const numstatOut = touched.length
     ? await runText($, ['git', 'diff', '--numstat', `${baseSha}..${headSha}`, '--', ...touched.map((t) => t.path)], cwd)
     : undefined;
@@ -144,7 +165,7 @@ export async function buildRequest(
 
   return {
     repo,
-    pr: null,
+    pr,
     base_sha: baseSha,
     head_sha: headSha,
     codemap_version: version,
@@ -161,7 +182,7 @@ export async function buildRequest(
 export function summaryLine(outcome: ReviewGateOutcome): string {
   switch (outcome.kind) {
     case 'decided':
-      return `Review: ${outcome.review ? 'yes' : 'skip'} · ${outcome.reason}`;
+      return `Review: ${outcome.review ? 'yes' : 'skip'} · ${outcome.reason}${outcome.facts.length > 1 ? ` · +${outcome.facts.length - 1} more` : ''}`;
     case 'unauthorized':
       return 'codemap Team: invalid license key';
     case 'payment_required':
